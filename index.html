@@ -26,13 +26,13 @@
             </div>
             
             <nav class="p-4 space-y-1">
-                <button onclick="app.switchTab('dashboard')" class="nav-item active" id="nav-dashboard">
+                <button class="nav-item active" id="nav-dashboard">
                     <i class="ph ph-squares-four"></i> Dashboard
                 </button>
-                <button onclick="app.switchTab('calendar')" class="nav-item" id="nav-calendar">
+                <button class="nav-item" id="nav-calendar">
                     <i class="ph ph-calendar-blank"></i> Calendar Flow
                 </button>
-                <button onclick="app.switchTab('forecast')" class="nav-item" id="nav-forecast">
+                <button class="nav-item" id="nav-forecast">
                     <i class="ph ph-trend-up"></i> Forecast
                 </button>
             </nav>
@@ -54,7 +54,7 @@
             <h2 class="text-lg font-bold text-slate-700" id="page-title">Dashboard</h2>
             
             <!-- Global Add Button -->
-            <button onclick="modalView.openTransactionModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition-colors shadow-sm shadow-indigo-200">
+            <button id="btn-add-transaction" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition-colors shadow-sm shadow-indigo-200">
                 <i class="ph-bold ph-plus"></i>
                 <span>Add Transaction</span>
             </button>
@@ -69,7 +69,7 @@
                 <div>
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-lg font-bold text-slate-800">My Wallets</h3>
-                        <button onclick="modalView.openAccountModal()" class="text-sm text-indigo-600 hover:text-indigo-800 font-medium">+ New Wallet</button>
+                        <button id="btn-new-wallet" class="text-sm text-indigo-600 hover:text-indigo-800 font-medium">+ New Wallet</button>
                     </div>
                     <div id="accounts-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         <!-- Account Cards Injected Here -->
@@ -101,8 +101,8 @@
                         <div class="flex justify-between items-center mb-4">
                             <h3 class="font-bold text-lg" id="cal-month-label">...</h3>
                             <div class="flex gap-2">
-                                <button onclick="calendarView.changeMonth(-1)" class="p-2 hover:bg-slate-100 rounded"><i class="ph-bold ph-caret-left"></i></button>
-                                <button onclick="calendarView.changeMonth(1)" class="p-2 hover:bg-slate-100 rounded"><i class="ph-bold ph-caret-right"></i></button>
+                                <button id="btn-prev-month" class="p-2 hover:bg-slate-100 rounded"><i class="ph-bold ph-caret-left"></i></button>
+                                <button id="btn-next-month" class="p-2 hover:bg-slate-100 rounded"><i class="ph-bold ph-caret-right"></i></button>
                             </div>
                         </div>
                         <!-- Day Headers -->
@@ -142,7 +142,7 @@
                             <div id="cal-info-active" class="hidden">
                                 <div class="flex justify-between items-center mb-4 pb-4 border-b border-slate-100">
                                     <h4 class="font-bold text-slate-800" id="selected-date-label">Date</h4>
-                                    <button onclick="calendarView.clearSelection()" class="text-xs text-slate-400 hover:text-slate-600">Close</button>
+                                    <button id="btn-close-cal" class="text-xs text-slate-400 hover:text-slate-600">Close</button>
                                 </div>
                                 <div id="day-transaction-list" class="space-y-3">
                                     <!-- List items -->
@@ -159,7 +159,7 @@
                 <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-wrap gap-4 items-center justify-between">
                     <div class="flex items-center gap-2">
                         <label class="text-sm font-bold text-slate-600">Timeline:</label>
-                        <select id="forecast-range" onchange="forecastView.render()" class="bg-slate-100 border-none rounded-lg text-sm font-medium py-1 px-3">
+                        <select id="forecast-range" class="bg-slate-100 border-none rounded-lg text-sm font-medium py-1 px-3">
                             <option value="1">1 Month</option>
                             <option value="3">3 Months</option>
                             <option value="6" selected>6 Months</option>
@@ -168,7 +168,7 @@
                     </div>
                     <div class="flex items-center gap-4">
                         <label class="flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
-                            <input type="checkbox" id="toggle-avg-spend" onchange="forecastView.render()" class="accent-indigo-600">
+                            <input type="checkbox" id="toggle-avg-spend" class="accent-indigo-600">
                             Include Daily Avg Spend
                         </label>
                     </div>

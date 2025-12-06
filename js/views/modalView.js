@@ -56,12 +56,14 @@ export const ModalView = {
                     <input type="text" name="note" placeholder="Add a note..." class="w-full p-2 border border-slate-300 rounded-lg text-sm">
 
                     <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-lg">Save Transaction</button>
-                    <button type="button" onclick="modalView.close()" class="w-full text-slate-400 py-2">Cancel</button>
+                    <button type="button" id="modal-cancel-btn" class="w-full text-slate-400 py-2">Cancel</button>
                 </form>
             </div>
         `;
 
         this.show(html);
+
+        document.getElementById('modal-cancel-btn').addEventListener('click', () => this.close());
 
         document.getElementById('tx-form').onsubmit = (e) => {
             e.preventDefault();
@@ -83,10 +85,12 @@ export const ModalView = {
                  <form id="adj-form">
                     <input type="number" name="newBalance" step="0.01" class="w-full p-2 border border-slate-300 rounded-lg mb-4" value="${account.balance}">
                     <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-2 rounded-lg">Update</button>
+                    <button type="button" id="modal-cancel-btn" class="w-full text-slate-400 py-2">Cancel</button>
                  </form>
             </div>
         `;
         this.show(html);
+        document.getElementById('modal-cancel-btn').addEventListener('click', () => this.close());
         document.getElementById('adj-form').onsubmit = (e) => {
             e.preventDefault();
             const val = parseFloat(e.target.newBalance.value);
@@ -119,12 +123,14 @@ export const ModalView = {
                         </select>
                     </div>
                     <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-3 rounded-lg">Create Wallet</button>
-                    <button type="button" onclick="modalView.close()" class="w-full text-slate-400 py-2">Cancel</button>
+                    <button type="button" id="modal-cancel-btn" class="w-full text-slate-400 py-2">Cancel</button>
                 </form>
             </div>
         `;
 
         this.show(html);
+
+        document.getElementById('modal-cancel-btn').addEventListener('click', () => this.close());
 
         document.getElementById('acc-form').onsubmit = (e) => {
             e.preventDefault();

@@ -57,3 +57,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Make app global for HTML onclicks
 window.app = app;
+
+// Event Listeners
+document.getElementById('nav-dashboard').addEventListener('click', () => app.switchTab('dashboard'));
+document.getElementById('nav-calendar').addEventListener('click', () => app.switchTab('calendar'));
+document.getElementById('nav-forecast').addEventListener('click', () => app.switchTab('forecast'));
+document.getElementById('btn-add-transaction').addEventListener('click', () => ModalView.openTransactionModal());
+document.getElementById('btn-new-wallet').addEventListener('click', () => ModalView.openAccountModal());
+document.getElementById('btn-prev-month').addEventListener('click', () => CalendarView.changeMonth(-1));
+document.getElementById('btn-next-month').addEventListener('click', () => CalendarView.changeMonth(1));
+document.getElementById('btn-close-cal').addEventListener('click', () => CalendarView.clearSelection());
+document.getElementById('forecast-range').addEventListener('change', () => ForecastView.render());
+document.getElementById('toggle-avg-spend').addEventListener('change', () => ForecastView.render());
