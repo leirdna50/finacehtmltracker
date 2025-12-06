@@ -68,15 +68,24 @@ export const DashboardView = {
             const card = e.target.closest('.wallet-card');
             if (card) {
                 draggedElement = card;
-                card.style.opacity = '0.5';
+                card.classList.add('opacity-30', 'scale-95', 'bg-slate-100');
                 e.dataTransfer.effectAllowed = 'move';
+                
+                // Calculate offset from cursor to top-left of card
+                const rect = card.getBoundingClientRect();
+                const offsetX = e.clientX - rect.left;
+                const offsetY = e.clientY - rect.top;
+                
+                e.dataTransfer.setDragImage(card, offsetX, offsetY);
             }
         });
 
         container.addEventListener('dragend', (e) => {
             if (draggedElement) {
-                draggedElement.style.opacity = '1';
+                draggedElement.classList.remove('opacity-30', 'scale-95', 'bg-slate-100');
+                draggedElement.classList.remove('border-2', 'border-indigo-500');
             }
+            draggedElement = null;
         });
 
         container.addEventListener('dragover', (e) => {
@@ -85,19 +94,39 @@ export const DashboardView = {
             
             const card = e.target.closest('.wallet-card');
             if (card && card !== draggedElement) {
+                // Remove highlight from all cards
+                container.querySelectorAll('.wallet-card').forEach(c => {
+                    c.classList.remove('border-2', 'border-indigo-500', 'border-t-4');
+                });
+                
                 const rect = card.getBoundingClientRect();
                 const midpoint = rect.top + rect.height / 2;
                 
                 if (e.clientY < midpoint) {
+                    card.classList.add('border-t-4', 'border-indigo-500');
                     card.parentNode.insertBefore(draggedElement, card);
                 } else {
+                    card.classList.add('border-b-4', 'border-indigo-500');
                     card.parentNode.insertBefore(draggedElement, card.nextSibling);
                 }
             }
         });
 
+        container.addEventListener('dragleave', (e) => {
+            const card = e.target.closest('.wallet-card');
+            if (card && card !== draggedElement) {
+                card.classList.remove('border-2', 'border-indigo-500', 'border-t-4', 'border-b-4');
+            }
+        });
+
         container.addEventListener('drop', (e) => {
             e.preventDefault();
+            
+            // Clear all highlights
+            container.querySelectorAll('.wallet-card').forEach(c => {
+                c.classList.remove('border-2', 'border-indigo-500', 'border-t-4', 'border-b-4');
+            });
+            
             if (draggedElement) {
                 // Get new order of wallet IDs
                 const newOrder = Array.from(container.querySelectorAll('.wallet-card')).map(card => card.dataset.walletId);

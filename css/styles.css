@@ -47,14 +47,48 @@
 .cal-day {
     border: 1px solid #E2E8F0;
     border-radius: 8px;
-    padding: 6px;
-    min-height: 80px;
+    padding: 8px;
+    min-height: 100px;
     transition: all 0.2s;
     cursor: pointer;
     position: relative;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+}
+
+.cal-day-num {
+    font-size: 0.75rem;
+    font-weight: bold;
+    color: #64748B;
+}
+
+.cal-amount {
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-align: center;
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 50px;
+}
+
+.cal-dots-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4px;
+    margin-top: auto;
+    justify-items: end;
+    align-items: end;
+}
+
+.cal-overflow {
+    font-size: 0.625rem;
+    font-weight: bold;
+    color: #64748B;
+    grid-column: 1 / -1;
+    text-align: right;
 }
 
 .cal-day:hover {
@@ -69,8 +103,24 @@
 }
 
 .cal-day.other-month {
-    opacity: 0.4;
-    background-color: #F8FAFC;
+    opacity: 1;
+    background-color: #E2E8F0 !important;
+    cursor: pointer;
+}
+
+html.dark .cal-day.other-month {
+    background-color: #0F172A !important;
+}
+
+/* Calendar and info box borders */
+.cal-day,
+#cal-context-panel {
+    border-color: #E2E8F0;
+}
+
+html.dark .cal-day,
+html.dark #cal-context-panel {
+    border-color: #334155;
 }
 
 /* Dots */
@@ -112,4 +162,215 @@
 .menu-item:hover {
     background-color: #F1F5F9;
     color: #1E293B;
+}
+
+/* Dark Mode Styles */
+html.dark {
+    background-color: #0F172A;
+    color: #F1F5F9;
+}
+
+html.dark body {
+    background-color: #0F172A;
+    color: #F1F5F9;
+}
+
+html.dark aside {
+    background-color: #1E293B !important;
+    border-right-color: #334155 !important;
+}
+
+html.dark main {
+    background-color: #0F172A !important;
+}
+
+html.dark header {
+    background-color: #1E293B !important;
+    border-bottom-color: #334155 !important;
+}
+
+html.dark .nav-item {
+    color: #CBD5E1 !important;
+}
+
+html.dark .nav-item:hover {
+    background-color: #334155 !important;
+    color: #E2E8F0 !important;
+}
+
+html.dark .nav-item.active {
+    background-color: #4F46E5 !important;
+    color: #FFFFFF !important;
+}
+
+html.dark [class*="bg-white"] {
+    background-color: #1E293B !important;
+}
+
+html.dark [class*="bg-slate-50"],
+html.dark [class*="bg-slate-100"] {
+    background-color: #334155 !important;
+}
+
+html.dark [class*="text-slate-700"],
+html.dark [class*="text-slate-800"],
+html.dark [class*="text-slate-900"] {
+    color: #E2E8F0 !important;
+}
+
+html.dark [class*="text-slate-500"],
+html.dark [class*="text-slate-600"],
+html.dark [class*="text-slate-400"] {
+    color: #94A3B8 !important;
+}
+
+html.dark [class*="border-slate-100"],
+html.dark [class*="border-slate-200"] {
+    border-color: #334155 !important;
+}
+
+html.dark input,
+html.dark select,
+html.dark textarea {
+    background-color: #334155 !important;
+    color: #E2E8F0 !important;
+    border-color: #475569 !important;
+}
+
+html.dark input::placeholder {
+    color: #64748B !important;
+}
+
+html.dark .border-slate-300 {
+    border-color: #475569 !important;
+}
+
+html.dark [class*="bg-emerald-50"] {
+    background-color: #1E3A2F !important;
+}
+
+html.dark [class*="bg-rose-50"] {
+    background-color: #3F1F2A !important;
+}
+
+html.dark [class*="bg-indigo-50"] {
+    background-color: #1F2358 !important;
+}
+
+html.dark [class*="bg-slate-700"] {
+    background-color: #334155 !important;
+}
+
+html.dark .scroll-smooth {
+    background-color: #0F172A !important;
+    color: #E2E8F0 !important;
+}
+
+/* Toggle Button Styling - Preserve Active State */
+#btn-toggle-privacy,
+#btn-toggle-dark {
+    color: #64748B !important;
+}
+
+#btn-toggle-privacy:hover,
+#btn-toggle-dark:hover {
+    background-color: #E2E8F0 !important;
+}
+
+#btn-toggle-privacy.bg-indigo-100,
+#btn-toggle-dark.bg-indigo-100 {
+    background-color: #EEF2FF !important;
+    color: #4F46E5 !important;
+}
+
+html.dark #btn-toggle-privacy,
+html.dark #btn-toggle-dark {
+    color: #94A3B8 !important;
+}
+
+html.dark #btn-toggle-privacy:hover,
+html.dark #btn-toggle-dark:hover {
+    background-color: #475569 !important;
+}
+
+html.dark #btn-toggle-privacy.bg-indigo-100,
+html.dark #btn-toggle-dark.bg-indigo-100 {
+    background-color: #312E81 !important;
+    color: #A5B4FC !important;
+}
+
+/* Month at a Glance stat boxes in dark mode */
+html.dark [class*="border-emerald-100"] {
+    border-color: #064E3B !important;
+}
+
+html.dark [class*="border-rose-100"] {
+    border-color: #4C0519 !important;
+}
+
+html.dark [class*="border-indigo-100"] {
+    border-color: #312E81 !important;
+}
+
+/* Cash Flow Spacing Buttons */
+.cashflow-spacing-btn {
+    color: #64748B;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.cashflow-spacing-btn:hover {
+    background-color: #DBEAFE;
+    color: #0369A1;
+}
+
+.cashflow-spacing-btn.active {
+    background-color: #3B82F6;
+    color: white;
+}
+
+html.dark .cashflow-spacing-btn {
+    color: #94A3B8;
+}
+
+html.dark .cashflow-spacing-btn:hover {
+    background-color: #475569;
+    color: #E2E8F0;
+}
+
+html.dark .cashflow-spacing-btn.active {
+    background-color: #4F46E5;
+    color: white;
+}
+
+/* Wallet Transaction Items - Dark Mode */
+html.dark .wallet-tx-item[data-tx-type="expense"] .bg-rose-100 {
+    background-color: #FCA5A5 !important;
+}
+
+html.dark .wallet-tx-item[data-tx-type="expense"] .bg-rose-100 i {
+    color: #991B1B !important;
+}
+
+html.dark .wallet-tx-item[data-tx-type="expense"] .text-rose-600 {
+    color: #FCA5A5 !important;
+}
+
+/* Modal Transaction Type Buttons - Dark Mode */
+html.dark .flex.bg-slate-100 {
+    background-color: #334155 !important;
+}
+
+html.dark .flex.bg-slate-100 label {
+    color: #E2E8F0 !important;
+}
+
+html.dark .flex.bg-slate-100 label:has(:checked) {
+    background-color: #4F46E5 !important;
+}
+
+html.dark .flex.bg-slate-100 label:has(:checked) span {
+    color: #A5B4FC !important;
 }
