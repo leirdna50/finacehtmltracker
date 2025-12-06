@@ -2,6 +2,7 @@ import { AccountManager } from '../modules/accountManager.js';
 import { Analytics } from '../modules/analytics.js';
 import { store } from '../modules/store.js';
 import { formatCurrency } from '../utils.js';
+import { escapeHTML } from '../utils.js';
 
 export const DashboardView = {
     render() {
@@ -48,7 +49,7 @@ export const DashboardView = {
                         </div>
                     </div>
                     
-                    <h4 class="font-bold text-slate-700 mb-1">${acc.name}</h4>
+                    <h4 class="font-bold text-slate-700 mb-1">${escapeHTML(acc.name)}</h4>
                     <p class="text-2xl font-bold text-slate-800">${formatCurrency(acc.balance)}</p>
                     ${ghostHtml}
                 </div>

@@ -9,7 +9,7 @@ export const TransactionEngine = {
             id: 'tx_' + Date.now(),
             accountId: data.accountId,
             type: data.type, // 'income' or 'expense'
-            amount: parseFloat(data.amount),
+            amount: Math.round(parseFloat(data.amount) * 100), // Convert to cents
             category: data.category,
             date: data.date, // ISO string
             note: data.note || '',

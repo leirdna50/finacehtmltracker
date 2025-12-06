@@ -4,6 +4,7 @@ import { CalendarView } from './views/calendarView.js';
 import { ForecastView } from './views/forecastView.js';
 import { ModalView } from './views/modalView.js';
 import { formatCurrency } from './utils.js';
+import { store } from './modules/store.js';
 
 export const app = {
     currentTab: 'dashboard',
@@ -40,13 +41,14 @@ export const app = {
 
     // Expose for global onclicks
     deleteAccount(id) {
-        if(confirm('Delete this wallet?')) {
-            // In real app, call store.deleteAccount(id)
-            alert('Deleted ' + id);
-            this.refresh();
-        }
+    if(confirm('Delete this wallet?')) {
+        store.deleteAccount(id); // Actually delete it
+        this.refresh();
     }
+}
 };
+
+
 
 // Start App
 document.addEventListener('DOMContentLoaded', () => {

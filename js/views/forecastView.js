@@ -71,3 +71,5 @@ export const ForecastView = {
         });
     }
 };
+
+window.forecastView = ForecastView;
