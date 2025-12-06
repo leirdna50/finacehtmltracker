@@ -35,7 +35,7 @@ export const DashboardView = {
             const theme = colorMap[acc.color] || colorMap.indigo;
 
             return `
-                <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 relative group transition-all hover:shadow-md cursor-pointer wallet-card" data-wallet-id="${acc.id}">
+                <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 relative group transition-all hover:shadow-md cursor-pointer wallet-card" data-wallet-id="${acc.id}" draggable="true">
                     <div class="flex justify-between items-start mb-4">
                         <div class="p-2 rounded-lg ${theme}">
                             <i class="ph-fill ph-wallet text-xl"></i>
@@ -46,6 +46,7 @@ export const DashboardView = {
                                 <i class="ph-bold ph-dots-three text-xl"></i>
                             </button>
                             <div class="menu-dropdown">
+                                <button class="menu-item menu-rename" data-account-id="${acc.id}"><i class="ph ph-pencil"></i> Rename</button>
                                 <button class="menu-item menu-edit-balance" data-account-id="${acc.id}"><i class="ph ph-pencil-simple"></i> Adjust Balance</button>
                                 <button class="menu-item menu-quick-add" data-account-id="${acc.id}"><i class="ph ph-plus"></i> Quick Add</button>
                                 <button class="menu-item menu-delete text-rose-600" data-account-id="${acc.id}"><i class="ph ph-trash"></i> Delete</button>
@@ -60,11 +61,57 @@ export const DashboardView = {
             `;
         }).join('');
 
+        // Drag and drop functionality
+        let draggedElement = null;
+
+        container.addEventListener('dragstart', (e) => {
+            const card = e.target.closest('.wallet-card');
+            if (card) {
+                draggedElement = card;
+                card.style.opacity = '0.5';
+                e.dataTransfer.effectAllowed = 'move';
+            }
+        });
+
+        container.addEventListener('dragend', (e) => {
+            if (draggedElement) {
+                draggedElement.style.opacity = '1';
+            }
+        });
+
+        container.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            
+            const card = e.target.closest('.wallet-card');
+            if (card && card !== draggedElement) {
+                const rect = card.getBoundingClientRect();
+                const midpoint = rect.top + rect.height / 2;
+                
+                if (e.clientY < midpoint) {
+                    card.parentNode.insertBefore(draggedElement, card);
+                } else {
+                    card.parentNode.insertBefore(draggedElement, card.nextSibling);
+                }
+            }
+        });
+
+        container.addEventListener('drop', (e) => {
+            e.preventDefault();
+            if (draggedElement) {
+                // Get new order of wallet IDs
+                const newOrder = Array.from(container.querySelectorAll('.wallet-card')).map(card => card.dataset.walletId);
+                store.reorderAccounts(newOrder);
+            }
+        });
+
         // Event delegation for menu buttons
         container.addEventListener('click', (e) => {
             const accountId = e.target.closest('[data-account-id]')?.dataset.accountId;
             
-            if (e.target.closest('.menu-edit-balance')) {
+            if (e.target.closest('.menu-rename')) {
+                ModalView.openRenameWallet(accountId);
+            } else if (e.target.closest('.menu-edit-balance')) {
                 ModalView.openEditBalance(accountId);
             } else if (e.target.closest('.menu-quick-add')) {
                 ModalView.openTransactionModal(accountId);

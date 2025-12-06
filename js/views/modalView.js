@@ -39,6 +39,13 @@ export const ModalView = {
                         </select>
                     </div>
 
+                    <div id="transfer-to-container" class="hidden">
+                        <label class="block text-xs font-bold text-slate-500 uppercase">Transfer To Wallet</label>
+                        <select name="transferToId" class="w-full p-2 border border-slate-300 rounded-lg bg-white">
+                            ${accounts.map(a => `<option value="${a.id}">${a.name}</option>`).join('')}
+                        </select>
+                    </div>
+
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-bold text-slate-500 uppercase">Category</label>
@@ -95,6 +102,56 @@ export const ModalView = {
             document.getElementById('recurring-options').classList.toggle('hidden', !e.target.checked);
         });
 
+        // Show/hide transfer wallet selector and category field
+        const typeRadios = document.querySelectorAll('input[name="type"]');
+        const transferContainer = document.getElementById('transfer-to-container');
+        const categoryContainer = document.getElementById('category-container');
+        const categoryInput = document.querySelector('input[name="category"]');
+        const sourceWallet = document.querySelector('select[name="accountId"]');
+        const destWallet = document.querySelector('select[name="transferToId"]');
+        
+        typeRadios.forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                if (e.target.value === 'transfer') {
+                    transferContainer.classList.remove('hidden');
+                    categoryContainer.classList.add('hidden');
+                    categoryInput.value = 'Transfer';
+                    // Reset destination to first different wallet
+                    if (destWallet && sourceWallet) {
+                        const sourceId = sourceWallet.value;
+                        const diffOption = Array.from(destWallet.options).find(opt => opt.value !== sourceId);
+                        if (diffOption) destWallet.value = diffOption.value;
+                    }
+                } else {
+                    transferContainer.classList.add('hidden');
+                    categoryContainer.classList.remove('hidden');
+                    categoryInput.value = '';
+                }
+            });
+        });
+
+        // Smart wallet selection - prevent same wallet selection
+        if (sourceWallet && destWallet) {
+            sourceWallet.addEventListener('change', () => {
+                const sourceId = sourceWallet.value;
+                // If destination is same, switch to different wallet
+                if (destWallet.value === sourceId) {
+                    const diffOption = Array.from(destWallet.options).find(opt => opt.value !== sourceId);
+                    if (diffOption) destWallet.value = diffOption.value;
+                }
+            });
+
+            destWallet.addEventListener('change', () => {
+                const sourceId = sourceWallet.value;
+                const destId = destWallet.value;
+                // If user tries to select same wallet, auto-switch source
+                if (destId === sourceId) {
+                    const diffOption = Array.from(sourceWallet.options).find(opt => opt.value !== destId);
+                    if (diffOption) sourceWallet.value = diffOption.value;
+                }
+            });
+        }
+
         document.getElementById('modal-cancel-btn').addEventListener('click', () => this.close());
 
         document.getElementById('tx-form').onsubmit = (e) => {
@@ -102,7 +159,35 @@ export const ModalView = {
             const formData = new FormData(e.target);
             const data = Object.fromEntries(formData.entries());
             
-            TransactionEngine.addTransaction(data);
+            // If transfer, process both wallets
+            if (data.type === 'transfer' && data.transferToId) {
+                const sourceWallet = accounts.find(a => a.id === data.accountId);
+                const destWallet = accounts.find(a => a.id === data.transferToId);
+                
+                // Deduct from source wallet
+                TransactionEngine.addTransaction({
+                    id: 'tx_' + Date.now(),
+                    type: 'transfer',
+                    amount: parseFloat(data.amount) * 100, // Convert to cents
+                    category: 'Transfer',
+                    accountId: data.accountId,
+                    date: data.date,
+                    note: data.note || `Transfer to ${destWallet?.name || 'wallet'}`
+                });
+                
+                // Add to destination wallet
+                TransactionEngine.addTransaction({
+                    id: 'tx_' + (Date.now() + 1),
+                    type: 'transfer',
+                    amount: parseFloat(data.amount) * 100, // Convert to cents
+                    category: 'Transfer',
+                    accountId: data.transferToId,
+                    date: data.date,
+                    note: data.note || `Transfer from ${sourceWallet?.name || 'wallet'}`
+                });
+            } else {
+                TransactionEngine.addTransaction(data);
+            }
             
             // If recurring, add the recurring transaction record
             if (data.isRecurring === 'on') {
@@ -201,12 +286,13 @@ export const ModalView = {
 
     openEditBalance(accountId) {
         const account = AccountManager.getAccountById(accountId);
+        const balanceInDollars = (account.balance / 100).toFixed(2);
         const html = `
             <div class="p-6">
                  <h3 class="text-xl font-bold mb-4">Adjust Balance</h3>
-                 <p class="text-sm text-slate-500 mb-4">Current: ${account.balance}</p>
+                 <p class="text-sm text-slate-500 mb-4">Current: $${balanceInDollars}</p>
                  <form id="adj-form">
-                    <input type="number" name="newBalance" step="0.01" class="w-full p-2 border border-slate-300 rounded-lg mb-4" value="${account.balance}">
+                    <input type="number" name="newBalance" step="0.01" class="w-full p-2 border border-slate-300 rounded-lg mb-4" value="${balanceInDollars}">
                     <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-2 rounded-lg">Update</button>
                     <button type="button" id="modal-cancel-btn" class="w-full text-slate-400 py-2">Cancel</button>
                  </form>
@@ -272,6 +358,36 @@ export const ModalView = {
             store.addAccount(newAcc);
             this.close();
             app.smartRefresh();
+        };
+    },
+
+    openRenameWallet(accountId) {
+        const account = AccountManager.getAccountById(accountId);
+        
+        const html = `
+            <div class="p-6">
+                <h3 class="text-xl font-bold mb-4">Rename Wallet</h3>
+                <form id="rename-form" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Wallet Name</label>
+                        <input type="text" name="walletName" class="w-full p-2 border border-slate-300 rounded-lg" value="${escapeHTML(account.name)}" required>
+                    </div>
+                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 rounded-lg">Save</button>
+                    <button type="button" id="modal-cancel-btn" class="w-full text-slate-400 py-2">Cancel</button>
+                </form>
+            </div>
+        `;
+        this.show(html);
+        document.getElementById('modal-cancel-btn').addEventListener('click', () => this.close());
+        document.getElementById('rename-form').onsubmit = (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const newName = formData.get('walletName').trim();
+            if (newName) {
+                store.updateAccountName(accountId, newName);
+                this.close();
+                app.smartRefresh();
+            }
         };
     },
 

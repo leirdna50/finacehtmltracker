@@ -51,24 +51,14 @@ export const TransactionEngine = {
         });
     },
 
-    // Manual Balance Adjustment (Creates a "Balance Correction" transaction)
-    adjustBalance(accountId, newBalance) {
+    // Manual Balance Adjustment (Sets balance directly)
+    adjustBalance(accountId, newBalanceInDollars) {
         const account = AccountManager.getAccountById(accountId);
-        const diff = newBalance - account.balance;
-
-        if (diff === 0) return;
-
-        const type = diff > 0 ? 'income' : 'expense';
-        const amount = Math.abs(diff);
-
-        this.addTransaction({
-            accountId: accountId,
-            type: type,
-            amount: amount,
-            category: 'Adjustment',
-            date: new Date().toISOString(),
-            note: 'Manual Balance Correction'
-        });
+        // Convert to cents
+        const newBalanceInCents = Math.round(newBalanceInDollars * 100);
+        
+        // Directly set the balance without creating a transaction
+        store.updateAccountBalance(accountId, newBalanceInCents);
     },
 
     // Edit existing transaction

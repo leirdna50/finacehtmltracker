@@ -54,7 +54,7 @@ export const HistoryView = {
             
             // Calculate balance up to this date
             const balance = this.calculateBalanceAtDate(currentDate);
-            data.push(balance / 100); // Convert to dollars
+            data.push(store.data.settings?.privacyMode ? 0 : balance / 100); // Convert to dollars
 
             currentDate.setDate(currentDate.getDate() + interval);
         }
@@ -84,7 +84,16 @@ export const HistoryView = {
                     y: {
                         ticks: {
                             callback: function(value) {
-                                return '$' + value.toFixed(0);
+                                return store.data.settings?.privacyMode ? '••••' : '$' + value.toFixed(0);
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return store.data.settings?.privacyMode ? '••••' : '$' + context.parsed.y.toFixed(2);
                             }
                         }
                     }

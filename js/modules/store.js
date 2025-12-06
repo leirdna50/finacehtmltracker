@@ -79,6 +79,26 @@ class Store {
             this.save();
         }
     }
+
+    updateAccountName(id, newName) {
+        const acc = this.data.accounts.find(a => a.id === id);
+        if (acc) {
+            acc.name = newName;
+            this.save();
+        }
+    }
+
+    reorderAccounts(accountIds) {
+        // Create a map of id to account
+        const accountMap = {};
+        this.data.accounts.forEach(acc => {
+            accountMap[acc.id] = acc;
+        });
+        
+        // Rebuild accounts array in the new order
+        this.data.accounts = accountIds.map(id => accountMap[id]).filter(Boolean);
+        this.save();
+    }
 }
 
 export const store = new Store();

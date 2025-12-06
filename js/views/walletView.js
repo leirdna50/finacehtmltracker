@@ -7,13 +7,17 @@ import { TransactionEngine } from '../modules/transactionEngine.js';
 import { app } from '../app.js';
 
 export const WalletView = {
+    lastDeleteTime: 0,
+    consecutiveDeletes: 0,
+
     render(walletId) {
         const account = AccountManager.getAccountById(walletId);
         if(!account) return;
 
         // 1. Update Header
         document.getElementById('wallet-title').innerText = escapeHTML(account.name);
-        document.getElementById('wallet-balance').innerText = `Current Balance: ${formatCurrency(account.balance)}`;
+        const balanceText = store.data.settings?.privacyMode ? 'Current Balance: ••••' : `Current Balance: ${formatCurrency(account.balance)}`;
+        document.getElementById('wallet-balance').innerText = balanceText;
 
         // 2. Render Transactions organized by date
         const txList = document.getElementById('wallet-tx-list');
@@ -59,14 +63,29 @@ export const WalletView = {
                         </div>
                         <div class="flex items-center gap-1 flex-shrink-0">
                             <span class="font-bold ${amountColor}">
-                                ${isIncome ? '+' : '-'}${formatCurrency(t.amount)}
+                                ${store.data.settings?.privacyMode ? '••••' : `${isIncome ? '+' : '-'}${formatCurrency(t.amount)}`}
                             </span>
                             <button class="tx-edit-btn p-0.5 text-slate-400 hover:text-slate-600 rounded" title="Edit">
                                 <i class="ph ph-pencil-simple"></i>
                             </button>
-                            <button class="tx-delete-btn p-0.5 text-slate-400 hover:text-rose-600 rounded" title="Delete">
-                                <i class="ph ph-trash"></i>
-                            </button>
+                            <div class="relative">
+                                <button class="tx-delete-btn p-0.5 text-slate-400 hover:text-rose-600 rounded" title="Delete">
+                                    <i class="ph ph-trash"></i>
+                                </button>
+                                <div class="delete-confirm-bubble hidden absolute bottom-full right-0 mb-3 bg-rose-600 text-white text-xs font-bold rounded-lg p-3 w-48 z-50">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <span>Ignore delete confirm?</span>
+                                        <button type="button" class="close-delete-btn text-white hover:text-slate-200 p-0 w-5 h-5 flex items-center justify-center">
+                                            <i class="ph ph-x"></i>
+                                        </button>
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <button type="button" class="confirm-delete-btn flex-1 bg-rose-700 hover:bg-rose-800 px-2 py-1 rounded text-xs font-bold">Yes</button>
+                                        <button type="button" class="cancel-delete-btn flex-1 bg-slate-500 hover:bg-slate-600 px-2 py-1 rounded text-xs font-bold">No</button>
+                                    </div>
+                                    <div class="absolute bottom-full right-3 w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-rose-600"></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     `;
@@ -83,10 +102,47 @@ export const WalletView = {
                 if (e.target.closest('.tx-edit-btn')) {
                     ModalView.openEditTransactionModal(txId);
                 } else if (e.target.closest('.tx-delete-btn')) {
-                    if (confirm('Delete this transaction?')) {
+                    const now = Date.now();
+                    const timeSinceLastDelete = now - WalletView.lastDeleteTime;
+                    
+                    // Reset counter if more than 10 seconds since last delete
+                    if (timeSinceLastDelete > 10000) {
+                        WalletView.consecutiveDeletes = 0;
+                    }
+                    
+                    WalletView.consecutiveDeletes++;
+                    WalletView.lastDeleteTime = now;
+                    
+                    // After 2 consecutive deletes, show confirmation bubble
+                    if (WalletView.consecutiveDeletes <= 2) {
                         TransactionEngine.deleteTransaction(txId);
                         app.smartRefresh();
+                    } else {
+                        // Show confirmation bubble for 3rd+ delete
+                        const bubble = txItem.querySelector('.delete-confirm-bubble');
+                        bubble.classList.remove('hidden');
+                        
+                        const confirmBtn = bubble.querySelector('.confirm-delete-btn');
+                        const cancelBtn = bubble.querySelector('.cancel-delete-btn');
+                        const closeBtn = bubble.querySelector('.close-delete-btn');
+                        
+                        const hideBubble = () => {
+                            bubble.classList.add('hidden');
+                        };
+                        
+                        const performDelete = () => {
+                            TransactionEngine.deleteTransaction(txId);
+                            app.smartRefresh();
+                            WalletView.consecutiveDeletes = 0;
+                        };
+                        
+                        confirmBtn.onclick = performDelete;
+                        cancelBtn.onclick = hideBubble;
+                        closeBtn.onclick = hideBubble;
                     }
+                } else if (e.target.closest('.confirm-delete-btn') || e.target.closest('.cancel-delete-btn') || e.target.closest('.close-delete-btn')) {
+                    // Prevent event propagation for bubble buttons
+                    e.stopPropagation();
                 }
             });
         }
@@ -127,7 +183,7 @@ export const WalletView = {
             // transfers don't affect wallet balance
             
             labels.push(new Date(t.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
-            data.push(balance / 100); // Convert cents to dollars
+            data.push(store.data.settings?.privacyMode ? 0 : balance / 100); // Convert cents to dollars, hide if privacy mode
         });
 
         if (window.walletHistoryChart) window.walletHistoryChart.destroy();
@@ -157,7 +213,16 @@ export const WalletView = {
                     y: {
                         ticks: {
                             callback: function(value) {
-                                return '$' + value.toFixed(0);
+                                return store.data.settings?.privacyMode ? '••••' : '$' + value.toFixed(0);
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return store.data.settings?.privacyMode ? '••••' : '$' + context.parsed.y.toFixed(2);
                             }
                         }
                     }

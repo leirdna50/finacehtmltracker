@@ -47,11 +47,11 @@ export const ForecastView = {
                 }
             });
 
-            baselineData.push(currentBalance / 100);
+            baselineData.push(store.data.settings?.privacyMode ? 0 : currentBalance / 100);
             
             if (includeAvg) {
                 const avgSpend = 30 * interval;
-                realisticData.push((currentBalance - (avgSpend * 100 * (i/interval))) / 100);
+                realisticData.push(store.data.settings?.privacyMode ? 0 : (currentBalance - (avgSpend * 100 * (i/interval))) / 100);
             }
         }
 
@@ -91,7 +91,16 @@ export const ForecastView = {
                     y: {
                         ticks: {
                             callback: function(value) {
-                                return '$' + value.toFixed(0);
+                                return store.data.settings?.privacyMode ? '••••' : '$' + value.toFixed(0);
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return store.data.settings?.privacyMode ? '••••' : '$' + context.parsed.y.toFixed(2);
                             }
                         }
                     }
