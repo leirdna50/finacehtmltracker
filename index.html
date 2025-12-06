@@ -18,11 +18,21 @@
     <!-- Sidebar Navigation -->
     <aside class="w-64 bg-white border-r border-slate-200 flex flex-col justify-between flex-shrink-0 z-20">
         <div>
-            <div class="p-6 flex items-center gap-3 border-b border-slate-100">
-                <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white">
-                    <i class="ph-bold ph-wallet"></i>
+            <div class="p-6 flex items-center justify-between border-b border-slate-100">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white">
+                        <i class="ph-bold ph-wallet"></i>
+                    </div>
+                    <h1 class="font-bold text-xl tracking-tight text-slate-900">FinTrack</h1>
                 </div>
-                <h1 class="font-bold text-xl tracking-tight text-slate-900">FinTrack</h1>
+                <div class="flex items-center gap-2">
+                    <button id="btn-toggle-privacy" class="p-2 hover:bg-slate-100 rounded-lg transition-colors text-slate-600 hover:text-slate-800" title="Toggle Privacy Mode">
+                        <i class="ph-bold ph-eye"></i>
+                    </button>
+                    <button id="btn-toggle-dark" class="p-2 hover:bg-slate-100 rounded-lg transition-colors text-slate-600 hover:text-slate-800" title="Toggle Dark Mode">
+                        <i class="ph-bold ph-moon"></i>
+                    </button>
+                </div>
             </div>
             
             <nav class="p-4 space-y-1">
@@ -33,7 +43,7 @@
                     <i class="ph ph-calendar-blank"></i> Calendar Flow
                 </button>
                 <button class="nav-item" id="nav-forecast">
-                    <i class="ph ph-trend-up"></i> Forecast
+                    <i class="ph ph-trend-up"></i> Fincancial Graphs
                 </button>
             </nav>
         </div>
@@ -79,7 +89,15 @@
                 <!-- Dashboard Infographics -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-                        <h4 class="font-bold text-slate-700 mb-4">Cash Flow (Last 30 Days)</h4>
+                        <div class="flex items-center justify-between mb-4">
+                            <h4 class="font-bold text-slate-700">Cash Flow (Last 30 Days)</h4>
+                            <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-lg">
+                                <button id="cashflow-spacing-daily" class="cashflow-spacing-btn px-3 py-1 text-xs font-medium rounded transition-colors" data-spacing="1">Daily</button>
+                                <button id="cashflow-spacing-2day" class="cashflow-spacing-btn px-3 py-1 text-xs font-medium rounded transition-colors" data-spacing="2">2 Day</button>
+                                <button id="cashflow-spacing-3day" class="cashflow-spacing-btn px-3 py-1 text-xs font-medium rounded transition-colors" data-spacing="3">3 Day</button>
+                                <button id="cashflow-spacing-weekly" class="cashflow-spacing-btn px-3 py-1 text-xs font-medium rounded transition-colors active" data-spacing="7">1 Week</button>
+                            </div>
+                        </div>
                         <div class="h-64 relative w-full">
                             <canvas id="chart-cashflow"></canvas>
                         </div>
@@ -156,7 +174,7 @@
             <!-- VIEW: FORECAST -->
             <div id="view-forecast" class="view-section hidden space-y-6">
                 <!-- Controls -->
-                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-wrap gap-4 items-center justify-between">
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
                     <div class="flex items-center gap-2">
                         <label class="text-sm font-bold text-slate-600">Timeline:</label>
                         <select id="forecast-range" class="bg-slate-100 border-none rounded-lg text-sm font-medium py-1 px-3">
@@ -166,6 +184,13 @@
                             <option value="12">1 Year</option>
                         </select>
                     </div>
+                    
+                    <div class="flex items-center gap-4">
+                        <label class="text-sm font-bold text-slate-600 flex-shrink-0">Time Spacing:</label>
+                        <input type="range" id="forecast-spacing" min="0" max="9" value="6" class="flex-1 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
+                        <span id="spacing-label" class="text-sm font-medium text-slate-700 bg-slate-100 px-3 py-1 rounded-lg flex-shrink-0">Weekly</span>
+                    </div>
+                    
                     <div class="flex items-center gap-4">
                         <label class="flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
                             <input type="checkbox" id="toggle-avg-spend" class="accent-indigo-600">
@@ -181,6 +206,43 @@
                         <canvas id="chart-forecast"></canvas>
                     </div>
                 </div>
+
+                <!-- Net Worth History Section -->
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
+                    <h3 class="font-bold text-lg">Net Worth History</h3>
+                    
+                    <!-- History Controls -->
+                    <div class="space-y-4">
+                        <div class="flex items-center gap-2">
+                            <label class="text-sm font-bold text-slate-600">Range:</label>
+                            <select id="history-range" class="bg-slate-100 border-none rounded-lg text-sm font-medium py-1 px-3">
+                                <option value="month">Last Month</option>
+                                <option value="3months">Last 3 Months</option>
+                                <option value="6months" selected>Last 6 Months</option>
+                                <option value="year">Last Year</option>
+                                <option value="custom">Custom Range</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Custom Date Pickers (Hidden by default) -->
+                        <div id="custom-date-pickers" class="hidden flex items-center gap-3">
+                            <input type="date" id="history-start-date" class="bg-slate-100 border-none rounded-lg text-sm font-medium py-1 px-3">
+                            <span class="text-slate-500">to</span>
+                            <input type="date" id="history-end-date" class="bg-slate-100 border-none rounded-lg text-sm font-medium py-1 px-3">
+                        </div>
+                        
+                        <div class="flex items-center gap-4">
+                            <label class="text-sm font-bold text-slate-600 flex-shrink-0">Detail:</label>
+                            <input type="range" id="history-spacing" min="0" max="9" value="6" class="flex-1 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
+                            <span id="history-spacing-label" class="text-sm font-medium text-slate-700 bg-slate-100 px-3 py-1 rounded-lg flex-shrink-0">Weekly</span>
+                        </div>
+                    </div>
+                    
+                    <!-- History Chart -->
+                    <div class="h-80 relative w-full">
+                        <canvas id="chart-history"></canvas>
+                    </div>
+                </div>
             </div>
 
             <!-- VIEW: WALLET DETAIL -->
@@ -193,17 +255,32 @@
                         <h2 class="text-2xl font-bold text-slate-800" id="wallet-title">Wallet Name</h2>
                         <p class="text-slate-500" id="wallet-balance">Current Balance: $0.00</p>
                     </div>
+                    <button id="btn-wallet-add-tx" class="ml-auto bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition-colors shadow-sm shadow-indigo-200">
+                        <i class="ph-bold ph-plus"></i>
+                        <span>Add Transaction</span>
+                    </button>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div class="lg:col-span-2 bg-white rounded-xl border border-slate-200 shadow-sm p-6">
-                        <h3 class="font-bold text-lg mb-4">Transaction History</h3>
-                        <div id="wallet-tx-list" class="space-y-3">
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 h-[600px]">
+                    <!-- Transaction History (25%) -->
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4 overflow-y-auto">
+                        <h3 class="font-bold text-lg mb-4 sticky top-0 bg-white">Transaction History</h3>
+                        <div id="wallet-tx-list" class="space-y-2">
                             <!-- Transactions injected here -->
                         </div>
                     </div>
 
-                    <div class="space-y-6">
+                    <!-- Charts (75%) -->
+                    <div class="lg:col-span-3 space-y-6">
+                        <!-- Wallet History Chart -->
+                        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+                            <h3 class="font-bold text-lg mb-4">Wallet Balance History</h3>
+                            <div class="h-64 relative w-full">
+                                <canvas id="chart-wallet-history"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Spending by Category Chart -->
                         <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
                             <h3 class="font-bold text-lg mb-4">Spending by Category</h3>
                             <div class="h-64 relative">

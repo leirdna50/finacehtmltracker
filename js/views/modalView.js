@@ -55,7 +55,130 @@ export const ModalView = {
 
                     <input type="text" name="note" placeholder="Add a note..." class="w-full p-2 border border-slate-300 rounded-lg text-sm">
 
+                    <div class="border-t border-slate-200 pt-4">
+                        <h4 class="text-sm font-bold text-slate-700 mb-3">Make Recurring?</h4>
+                        <div class="space-y-2">
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" name="isRecurring" class="accent-indigo-600 rounded" id="recurring-toggle">
+                                <span class="text-sm text-slate-600">Yes, make this recurring</span>
+                            </label>
+                        </div>
+                        
+                        <div id="recurring-options" class="hidden mt-3 space-y-3 p-3 bg-slate-50 rounded-lg">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Frequency</label>
+                                <select name="frequency" class="w-full p-2 border border-slate-300 rounded-lg bg-white text-sm">
+                                    <option value="daily">Daily</option>
+                                    <option value="weekly">Weekly</option>
+                                    <option value="biweekly">Every 2 Weeks</option>
+                                    <option value="monthly" selected>Monthly</option>
+                                    <option value="yearly">Yearly</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Repeat Until (Optional)</label>
+                                <input type="date" name="recurringEndDate" class="w-full p-2 border border-slate-300 rounded-lg text-sm">
+                            </div>
+                        </div>
+                    </div>
+
                     <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-lg">Save Transaction</button>
+                    <button type="button" id="modal-cancel-btn" class="w-full text-slate-400 py-2">Cancel</button>
+                </form>
+            </div>
+        `;
+
+        this.show(html);
+
+        // Toggle recurring options
+        document.getElementById('recurring-toggle').addEventListener('change', (e) => {
+            document.getElementById('recurring-options').classList.toggle('hidden', !e.target.checked);
+        });
+
+        document.getElementById('modal-cancel-btn').addEventListener('click', () => this.close());
+
+        document.getElementById('tx-form').onsubmit = (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+            
+            TransactionEngine.addTransaction(data);
+            
+            // If recurring, add the recurring transaction record
+            if (data.isRecurring === 'on') {
+                store.addRecurring({
+                    id: 'rec_' + Date.now(),
+                    txType: data.type,
+                    accountId: data.accountId,
+                    amount: data.amount,
+                    category: data.category,
+                    frequency: data.frequency,
+                    startDate: data.date,
+                    endDate: data.recurringEndDate || null,
+                    note: data.note || '',
+                    lastGenerated: data.date
+                });
+            }
+            
+            this.close();
+            app.smartRefresh();
+        };
+    },
+
+    openEditTransactionModal(txId) {
+        const tx = store.data.transactions.find(t => t.id === txId);
+        if (!tx) return;
+
+        const accounts = AccountManager.getAccounts();
+        
+        const html = `
+            <div class="p-6">
+                <h3 class="text-xl font-bold mb-4">Edit Transaction</h3>
+                <form id="tx-form" class="space-y-4">
+                    <div class="flex bg-slate-100 p-1 rounded-lg">
+                        <label class="flex-1 text-center py-2 rounded-md cursor-pointer has-[:checked]:bg-white has-[:checked]:shadow-sm">
+                            <input type="radio" name="type" value="expense" class="hidden" ${tx.type === 'expense' ? 'checked' : ''}>
+                            <span class="text-sm font-bold text-rose-600">Expense</span>
+                        </label>
+                        <label class="flex-1 text-center py-2 rounded-md cursor-pointer has-[:checked]:bg-white has-[:checked]:shadow-sm">
+                            <input type="radio" name="type" value="income" class="hidden" ${tx.type === 'income' ? 'checked' : ''}>
+                            <span class="text-sm font-bold text-emerald-600">Income</span>
+                        </label>
+                         <label class="flex-1 text-center py-2 rounded-md cursor-pointer has-[:checked]:bg-white has-[:checked]:shadow-sm">
+                            <input type="radio" name="type" value="transfer" class="hidden" ${tx.type === 'transfer' ? 'checked' : ''}>
+                            <span class="text-sm font-bold text-indigo-600">Transfer</span>
+                        </label>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase">Amount</label>
+                        <input type="number" name="amount" step="0.01" value="${(tx.amount / 100).toFixed(2)}" class="w-full p-2 border border-slate-300 rounded-lg text-lg font-bold" required>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase">Wallet</label>
+                        <select name="accountId" class="w-full p-2 border border-slate-300 rounded-lg bg-white">
+                            ${accounts.map(a => `<option value="${a.id}" ${a.id === tx.accountId ? 'selected' : ''}>${a.name}</option>`).join('')}
+                        </select>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase">Category</label>
+                            <input type="text" name="category" value="${tx.category}" class="w-full p-2 border border-slate-300 rounded-lg" list="cat-suggestions">
+                            <datalist id="cat-suggestions">
+                                <option value="Food"><option value="Rent"><option value="Transport"><option value="Salary">
+                            </datalist>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase">Date</label>
+                            <input type="date" name="date" value="${tx.date.split('T')[0]}" class="w-full p-2 border border-slate-300 rounded-lg">
+                        </div>
+                    </div>
+
+                    <input type="text" name="note" placeholder="Add a note..." value="${tx.note}" class="w-full p-2 border border-slate-300 rounded-lg text-sm">
+
+                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-lg">Update Transaction</button>
                     <button type="button" id="modal-cancel-btn" class="w-full text-slate-400 py-2">Cancel</button>
                 </form>
             </div>
@@ -70,9 +193,9 @@ export const ModalView = {
             const formData = new FormData(e.target);
             const data = Object.fromEntries(formData.entries());
             
-            TransactionEngine.addTransaction(data);
+            TransactionEngine.editTransaction(txId, data);
             this.close();
-            app.refresh();
+            app.smartRefresh();
         };
     },
 
@@ -96,7 +219,7 @@ export const ModalView = {
             const val = parseFloat(e.target.newBalance.value);
             TransactionEngine.adjustBalance(accountId, val);
             this.close();
-            app.refresh();
+            app.smartRefresh();
         };
     },
 
@@ -148,7 +271,7 @@ export const ModalView = {
 
             store.addAccount(newAcc);
             this.close();
-            app.refresh();
+            app.smartRefresh();
         };
     },
 

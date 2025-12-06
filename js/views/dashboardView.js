@@ -7,6 +7,8 @@ import { ModalView } from './modalView.js';
 import { app } from '../app.js';
 
 export const DashboardView = {
+    currentCashFlowSpacing: 7,
+
     render() {
         this.renderAccounts();
         this.renderCharts();
@@ -87,7 +89,7 @@ export const DashboardView = {
     },
 
     renderCharts() {
-        const flowData = Analytics.getCashFlowData();
+        const flowData = Analytics.getCashFlowData(this.currentCashFlowSpacing);
         const catData = Analytics.getCategoryData();
 
         const ctx1 = document.getElementById('chart-cashflow').getContext('2d');
@@ -127,5 +129,20 @@ export const DashboardView = {
             },
             options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
         });
+    },
+
+    setCashFlowSpacing(days) {
+        this.currentCashFlowSpacing = days;
+        
+        // Update button states
+        document.querySelectorAll('.cashflow-spacing-btn').forEach(btn => {
+            btn.classList.remove('active');
+            if (parseInt(btn.dataset.spacing) === days) {
+                btn.classList.add('active');
+            }
+        });
+        
+        // Re-render the chart
+        this.renderCharts();
     }
 };

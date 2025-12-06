@@ -69,5 +69,56 @@ export const TransactionEngine = {
             date: new Date().toISOString(),
             note: 'Manual Balance Correction'
         });
+    },
+
+    // Edit existing transaction
+    editTransaction(txId, data) {
+        const tx = store.data.transactions.find(t => t.id === txId);
+        if (!tx) return;
+
+        const oldAmount = tx.amount;
+        const oldType = tx.type;
+        const newAmount = Math.round(parseFloat(data.amount) * 100);
+        const newType = data.type;
+
+        // Update transaction details
+        tx.type = newType;
+        tx.amount = newAmount;
+        tx.category = data.category;
+        tx.date = data.date;
+        tx.note = data.note || '';
+
+        // Recalculate account balance if amount or type changed
+        if (oldAmount !== newAmount || oldType !== newType) {
+            const account = AccountManager.getAccountById(tx.accountId);
+            let newBalance = account.balance;
+
+            // Reverse the old transaction
+            if (oldType === 'income') newBalance -= oldAmount;
+            else newBalance += oldAmount;
+
+            // Apply the new transaction
+            if (newType === 'income') newBalance += newAmount;
+            else newBalance -= newAmount;
+
+            store.updateAccountBalance(tx.accountId, newBalance);
+        }
+
+        store.save();
+    },
+
+    // Delete transaction
+    deleteTransaction(txId) {
+        const tx = store.data.transactions.find(t => t.id === txId);
+        if (!tx) return;
+
+        // Reverse the transaction's impact on balance
+        const account = AccountManager.getAccountById(tx.accountId);
+        let newBalance = account.balance;
+        if (tx.type === 'income') newBalance -= tx.amount;
+        else newBalance += tx.amount;
+
+        store.updateAccountBalance(tx.accountId, newBalance);
+        store.deleteTransaction(txId);
     }
 };

@@ -21,8 +21,7 @@ export const ForecastView = {
         const includeAvg = document.getElementById('toggle-avg-spend').checked;
         
         // Update label
-        const spacingLabel = document.getElementById('spacing-label');
-        if (spacingLabel) spacingLabel.innerText = this.getSpacingLabel(spacingIndex);
+        document.getElementById('spacing-label').innerText = this.getSpacingLabel(spacingIndex);
         
         const ctx = document.getElementById('chart-forecast').getContext('2d');
         
