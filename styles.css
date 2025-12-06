@@ -1,0 +1,115 @@
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-track {
+    background: transparent; 
+}
+::-webkit-scrollbar-thumb {
+    background: #CBD5E1; 
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #94A3B8; 
+}
+
+/* Nav Item Styling */
+.nav-item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    color: #64748B;
+    font-weight: 500;
+    transition: all 0.2s;
+    text-align: left;
+}
+
+.nav-item:hover {
+    background-color: #F8FAFC;
+    color: #1E293B;
+}
+
+.nav-item.active {
+    background-color: #EEF2FF;
+    color: #4F46E5;
+    font-weight: 600;
+}
+
+.nav-item i {
+    font-size: 1.25rem;
+}
+
+/* Calendar Grid */
+.cal-day {
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    padding: 6px;
+    min-height: 80px;
+    transition: all 0.2s;
+    cursor: pointer;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.cal-day:hover {
+    border-color: #6366F1;
+    background-color: #FAFAFA;
+}
+
+.cal-day.active-selected {
+    border-color: #4F46E5;
+    background-color: #EEF2FF;
+    box-shadow: inset 0 0 0 1px #4F46E5;
+}
+
+.cal-day.other-month {
+    opacity: 0.4;
+    background-color: #F8FAFC;
+}
+
+/* Dots */
+.dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+}
+.dot-income { background-color: #10B981; }
+.dot-expense { background-color: #F43F5E; }
+.dot-transfer { background-color: #6366F1; }
+
+/* Account Card 3-Dots Menu */
+.menu-trigger:focus + .menu-dropdown,
+.menu-dropdown:hover {
+    display: block;
+}
+.menu-dropdown {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 100%;
+    width: 160px;
+    background: white;
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+    overflow: hidden;
+}
+.menu-item {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 8px 12px;
+    font-size: 0.875rem;
+    color: #475569;
+}
+.menu-item:hover {
+    background-color: #F1F5F9;
+    color: #1E293B;
+}

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finance Tracker Pro</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Phosphor Icons (SVG Library) -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-slate-50 text-slate-800 h-screen flex overflow-hidden font-sans">
+
+    <!-- Sidebar Navigation -->
+    <aside class="w-64 bg-white border-r border-slate-200 flex flex-col justify-between flex-shrink-0 z-20">
+        <div>
+            <div class="p-6 flex items-center gap-3 border-b border-slate-100">
+                <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white">
+                    <i class="ph-bold ph-wallet"></i>
+                </div>
+                <h1 class="font-bold text-xl tracking-tight text-slate-900">FinTrack</h1>
+            </div>
+            
+            <nav class="p-4 space-y-1">
+                <button onclick="app.switchTab('dashboard')" class="nav-item active" id="nav-dashboard">
+                    <i class="ph ph-squares-four"></i> Dashboard
+                </button>
+                <button onclick="app.switchTab('calendar')" class="nav-item" id="nav-calendar">
+                    <i class="ph ph-calendar-blank"></i> Calendar Flow
+                </button>
+                <button onclick="app.switchTab('forecast')" class="nav-item" id="nav-forecast">
+                    <i class="ph ph-trend-up"></i> Forecast
+                </button>
+            </nav>
+        </div>
+        
+        <div class="p-4 border-t border-slate-100">
+            <div class="bg-slate-50 rounded-lg p-4">
+                <p class="text-xs font-bold text-slate-400 uppercase mb-1">Total Net Worth</p>
+                <p class="text-xl font-bold text-emerald-600" id="global-net-worth">Loading...</p>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col relative overflow-hidden">
+        
+        <!-- Top Header (Dynamic) -->
+        <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 flex-shrink-0">
+            <h2 class="text-lg font-bold text-slate-700" id="page-title">Dashboard</h2>
+            
+            <!-- Global Add Button -->
+            <button onclick="modalView.openTransactionModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition-colors shadow-sm shadow-indigo-200">
+                <i class="ph-bold ph-plus"></i>
+                <span>Add Transaction</span>
+            </button>
+        </header>
+
+        <!-- Scrollable Viewport -->
+        <div class="flex-1 overflow-y-auto bg-slate-50 p-8 scroll-smooth" id="main-viewport">
+            
+            <!-- VIEW: DASHBOARD -->
+            <div id="view-dashboard" class="view-section space-y-8">
+                <!-- Accounts Grid -->
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold text-slate-800">My Wallets</h3>
+                        <button onclick="modalView.openAccountModal()" class="text-sm text-indigo-600 hover:text-indigo-800 font-medium">+ New Wallet</button>
+                    </div>
+                    <div id="accounts-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Account Cards Injected Here -->
+                    </div>
+                </div>
+
+                <!-- Dashboard Infographics -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                        <h4 class="font-bold text-slate-700 mb-4">Cash Flow (Last 30 Days)</h4>
+                        <div class="h-64 relative w-full">
+                            <canvas id="chart-cashflow"></canvas>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                        <h4 class="font-bold text-slate-700 mb-4">Expense Categories</h4>
+                        <div class="h-64 relative w-full flex justify-center">
+                            <canvas id="chart-categories"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW: CALENDAR -->
+            <div id="view-calendar" class="view-section hidden h-full flex flex-col">
+                <div class="flex h-full gap-6">
+                    <!-- The Grid (Left) -->
+                    <div class="flex-1 bg-white rounded-xl border border-slate-200 shadow-sm p-6 overflow-hidden flex flex-col">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-bold text-lg" id="cal-month-label">...</h3>
+                            <div class="flex gap-2">
+                                <button onclick="calendarView.changeMonth(-1)" class="p-2 hover:bg-slate-100 rounded"><i class="ph-bold ph-caret-left"></i></button>
+                                <button onclick="calendarView.changeMonth(1)" class="p-2 hover:bg-slate-100 rounded"><i class="ph-bold ph-caret-right"></i></button>
+                            </div>
+                        </div>
+                        <!-- Day Headers -->
+                        <div class="grid grid-cols-7 mb-2 text-center text-xs font-bold text-slate-400 uppercase">
+                            <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+                        </div>
+                        <!-- The Days -->
+                        <div id="calendar-grid" class="flex-1 grid grid-cols-7 grid-rows-6 gap-2">
+                            <!-- Generated Days -->
+                        </div>
+                    </div>
+
+                    <!-- The Context Panel (Right) -->
+                    <div class="w-80 flex-shrink-0 flex flex-col gap-6">
+                        <!-- Info Panel -->
+                        <div id="cal-context-panel" class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 flex-1 overflow-y-auto">
+                            <!-- Default State: Infographics -->
+                            <div id="cal-info-default">
+                                <h4 class="font-bold text-slate-800 mb-4">Month at a Glance</h4>
+                                <div class="space-y-4">
+                                    <div class="p-3 bg-emerald-50 rounded-lg border border-emerald-100">
+                                        <p class="text-xs text-emerald-600 font-bold uppercase">Total Income</p>
+                                        <p class="text-xl font-bold text-emerald-700" id="cal-stat-income">...</p>
+                                    </div>
+                                    <div class="p-3 bg-rose-50 rounded-lg border border-rose-100">
+                                        <p class="text-xs text-rose-600 font-bold uppercase">Total Expense</p>
+                                        <p class="text-xl font-bold text-rose-700" id="cal-stat-expense">...</p>
+                                    </div>
+                                    <div class="p-3 bg-indigo-50 rounded-lg border border-indigo-100">
+                                        <p class="text-xs text-indigo-600 font-bold uppercase">Net Change</p>
+                                        <p class="text-xl font-bold text-indigo-700" id="cal-stat-net">...</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Active State: Transactions List -->
+                            <div id="cal-info-active" class="hidden">
+                                <div class="flex justify-between items-center mb-4 pb-4 border-b border-slate-100">
+                                    <h4 class="font-bold text-slate-800" id="selected-date-label">Date</h4>
+                                    <button onclick="calendarView.clearSelection()" class="text-xs text-slate-400 hover:text-slate-600">Close</button>
+                                </div>
+                                <div id="day-transaction-list" class="space-y-3">
+                                    <!-- List items -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW: FORECAST -->
+            <div id="view-forecast" class="view-section hidden space-y-6">
+                <!-- Controls -->
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-wrap gap-4 items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <label class="text-sm font-bold text-slate-600">Timeline:</label>
+                        <select id="forecast-range" onchange="forecastView.render()" class="bg-slate-100 border-none rounded-lg text-sm font-medium py-1 px-3">
+                            <option value="1">1 Month</option>
+                            <option value="3">3 Months</option>
+                            <option value="6" selected>6 Months</option>
+                            <option value="12">1 Year</option>
+                        </select>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <label class="flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
+                            <input type="checkbox" id="toggle-avg-spend" onchange="forecastView.render()" class="accent-indigo-600">
+                            Include Daily Avg Spend
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Main Chart -->
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                    <h3 class="font-bold text-lg mb-4">Net Worth Projection</h3>
+                    <div class="h-96 relative w-full">
+                        <canvas id="chart-forecast"></canvas>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- MODAL OVERLAY -->
+    <div id="modal-overlay" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden z-50 flex items-center justify-center">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all scale-100" id="modal-content">
+            <!-- Modal Content Injected JS -->
+        </div>
+    </div>
+
+    <!-- SCRIPTS -->
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>
+
