@@ -20,4 +20,6 @@ export function initEventListeners() {
     // Forecast
     document.getElementById('forecast-range').addEventListener('change', () => ForecastView.render());
     document.getElementById('toggle-avg-spend').addEventListener('change', () => ForecastView.render());
+
+    document.getElementById('btn-back-to-dashboard').addEventListener('click', () => app.switchTab('dashboard'));
 }

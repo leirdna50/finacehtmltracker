@@ -32,9 +32,15 @@ export const Analytics = {
         return { labels: weeks, income: incomeData, expense: expenseData };
     },
 
-    // Get Spending grouped by Category
-    getCategoryData() {
-        const transactions = store.data.transactions.filter(t => t.type === 'expense');
+    // Get Spending grouped by Category (optionally filtered by accountId)
+    getCategoryData(accountId = null) {
+        let transactions = store.data.transactions.filter(t => t.type === 'expense');
+
+        // FILTER: If an ID is provided, only show that wallet's expenses
+        if (accountId) {
+            transactions = transactions.filter(t => t.accountId === accountId);
+        }
+
         const categories = {};
 
         transactions.forEach(tx => {

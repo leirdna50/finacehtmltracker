@@ -3,6 +3,7 @@ import { DashboardView } from './views/dashboardView.js';
 import { CalendarView } from './views/calendarView.js';
 import { ForecastView } from './views/forecastView.js';
 import { ModalView } from './views/modalView.js';
+import { WalletView } from './views/walletview.js';
 import { formatCurrency } from './utils.js';
 import { store } from './modules/store.js';
 
@@ -39,6 +40,20 @@ export const app = {
         this.refresh();
     },
 
+    viewWallet(id) {
+        this.currentTab = 'wallet';
+        
+        // Hide all views
+        document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+        document.getElementById('view-wallet').classList.remove('hidden');
+        
+        // Hide nav items and title updates (wallet view has custom header)
+        document.getElementById('page-title').innerText = 'Wallet Details';
+        
+        // Render the specific wallet view
+        WalletView.render(id);
+    },
+
     // Expose for global onclicks
     deleteAccount(id) {
     if(confirm('Delete this wallet?')) {
@@ -69,3 +84,4 @@ document.getElementById('btn-next-month').addEventListener('click', () => Calend
 document.getElementById('btn-close-cal').addEventListener('click', () => CalendarView.clearSelection());
 document.getElementById('forecast-range').addEventListener('change', () => ForecastView.render());
 document.getElementById('toggle-avg-spend').addEventListener('change', () => ForecastView.render());
+document.getElementById('btn-back-to-dashboard').addEventListener('click', () => app.switchTab('dashboard'));

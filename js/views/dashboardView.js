@@ -3,6 +3,8 @@ import { Analytics } from '../modules/analytics.js';
 import { store } from '../modules/store.js';
 import { formatCurrency } from '../utils.js';
 import { escapeHTML } from '../utils.js';
+import { ModalView } from './modalView.js';
+import { app } from '../app.js';
 
 export const DashboardView = {
     render() {
@@ -31,7 +33,7 @@ export const DashboardView = {
             const theme = colorMap[acc.color] || colorMap.indigo;
 
             return `
-                <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 relative group transition-all hover:shadow-md">
+                <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 relative group transition-all hover:shadow-md cursor-pointer wallet-card" data-wallet-id="${acc.id}">
                     <div class="flex justify-between items-start mb-4">
                         <div class="p-2 rounded-lg ${theme}">
                             <i class="ph-fill ph-wallet text-xl"></i>
@@ -42,9 +44,9 @@ export const DashboardView = {
                                 <i class="ph-bold ph-dots-three text-xl"></i>
                             </button>
                             <div class="menu-dropdown">
-                                <button onclick="modalView.openEditBalance('${acc.id}')" class="menu-item"><i class="ph ph-pencil-simple"></i> Adjust Balance</button>
-                                <button onclick="modalView.openTransactionModal('${acc.id}')" class="menu-item"><i class="ph ph-plus"></i> Quick Add</button>
-                                <button onclick="app.deleteAccount('${acc.id}')" class="menu-item text-rose-600"><i class="ph ph-trash"></i> Delete</button>
+                                <button class="menu-item menu-edit-balance" data-account-id="${acc.id}"><i class="ph ph-pencil-simple"></i> Adjust Balance</button>
+                                <button class="menu-item menu-quick-add" data-account-id="${acc.id}"><i class="ph ph-plus"></i> Quick Add</button>
+                                <button class="menu-item menu-delete text-rose-600" data-account-id="${acc.id}"><i class="ph ph-trash"></i> Delete</button>
                             </div>
                         </div>
                     </div>
@@ -55,6 +57,33 @@ export const DashboardView = {
                 </div>
             `;
         }).join('');
+
+        // Event delegation for menu buttons
+        container.addEventListener('click', (e) => {
+            const accountId = e.target.closest('[data-account-id]')?.dataset.accountId;
+            
+            if (e.target.closest('.menu-edit-balance')) {
+                ModalView.openEditBalance(accountId);
+            } else if (e.target.closest('.menu-quick-add')) {
+                ModalView.openTransactionModal(accountId);
+            } else if (e.target.closest('.menu-delete')) {
+                if (confirm('Delete this wallet?')) {
+                    store.deleteAccount(accountId);
+                    app.refresh();
+                }
+            }
+        });
+
+        // Event delegation for wallet card clicks
+        container.addEventListener('click', (e) => {
+            const card = e.target.closest('.wallet-card');
+            const menu = e.target.closest('.menu-trigger, .menu-dropdown, .menu-item');
+            
+            // Only open wallet if clicking the card itself, not the menu
+            if (card && !menu) {
+                app.viewWallet(card.dataset.walletId);
+            }
+        });
     },
 
     renderCharts() {

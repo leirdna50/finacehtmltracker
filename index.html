@@ -183,6 +183,37 @@
                 </div>
             </div>
 
+            <!-- VIEW: WALLET DETAIL -->
+            <div id="view-wallet" class="view-section hidden space-y-6">
+                <div class="flex items-center gap-4 mb-6">
+                    <button id="btn-back-to-dashboard" class="p-2 hover:bg-slate-200 rounded-lg transition-colors">
+                        <i class="ph-bold ph-arrow-left text-xl"></i>
+                    </button>
+                    <div>
+                        <h2 class="text-2xl font-bold text-slate-800" id="wallet-title">Wallet Name</h2>
+                        <p class="text-slate-500" id="wallet-balance">Current Balance: $0.00</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2 bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+                        <h3 class="font-bold text-lg mb-4">Transaction History</h3>
+                        <div id="wallet-tx-list" class="space-y-3">
+                            <!-- Transactions injected here -->
+                        </div>
+                    </div>
+
+                    <div class="space-y-6">
+                        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+                            <h3 class="font-bold text-lg mb-4">Spending by Category</h3>
+                            <div class="h-64 relative">
+                                <canvas id="chart-wallet-cat"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </main>
 
